@@ -1,0 +1,58 @@
+services:
+  ib-gateway:
+    image: gnzsnz/ib-gateway:stable
+    container_name: ib-gateway
+    restart: unless-stopped
+    environment:
+      - TWS_USERID=${TWS_USERID}
+      - TWS_PASSWORD=${TWS_PASSWORD}
+      - TRADING_MODE=${TRADING_MODE:-paper}
+      - READ_ONLY_API=${READ_ONLY_API:-no}
+      - TIME_ZONE=${TIME_ZONE:-Etc/UTC}
+      # VNC only if you set password:
+      - VNC_SERVER_PASSWORD=${VNC_SERVER_PASSWORD}
+      # Optional 2FA behavior:
+      - TWOFA_TIMEOUT_ACTION=${TWOFA_TIMEOUT_ACTION}
+      - AUTO_RESTART_TIME=${AUTO_RESTART_TIME}
+    volumes:
+      - ibgw:/config
+    # no public ports
+
+  collector:
+    build: ./collector
+    container_name: collector
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=${IB_HOST}
+      - IB_PORT=${IB_PORT}
+      - IB_CLIENT_ID=${IB_CLIENT_ID}
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=${SYMBOL}
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=${DB_SYMBOL}
+      - SOURCE=ibkr
+
+  watchdog:
+    build: ./watchdog
+    container_name: watchdog
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=${IB_HOST}
+      - IB_PORT=${IB_PORT}
+      - IB_CLIENT_ID=202
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=${SYMBOL}
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=${DB_SYMBOL}
+      - SOURCE=ibkr
+      - MAX_GAP_MINUTES=${MAX_GAP_MINUTES}
+      - BACKFILL_MINUTES=${BACKFILL_MINUTES}
+      - WATCHDOG_INTERVAL_SECONDS=${WATCHDOG_INTERVAL_SECONDS}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+
+volumes:
+  ibgw:
