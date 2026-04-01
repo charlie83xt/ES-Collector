@@ -40,7 +40,7 @@ def main():
                 # b5.time is datetime
                 emitted = agg.update_from_5s(
                     ts=b5.time,
-                    o=float(b5.open),
+                    o=float(b5.open_),
                     h=float(b5.high),
                     l=float(b5.low),
                     c=float(b5.close),

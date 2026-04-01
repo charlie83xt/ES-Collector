@@ -16,43 +16,82 @@ services:
       - AUTO_RESTART_TIME=${AUTO_RESTART_TIME}
     volumes:
       - ibgw:/config
+    ports:
+      - "127.0.0.1:5900:5900"
     # no public ports
 
-  collector:
+  collector_es:
     build: ./collector
-    container_name: collector
+    container_name: collector_es
     restart: unless-stopped
     depends_on:
       - ib-gateway
     environment:
-      - IB_HOST=${IB_HOST}
-      - IB_PORT=${IB_PORT}
-      - IB_CLIENT_ID=${IB_CLIENT_ID}
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=201
       - DATABASE_URL=${DATABASE_URL}
-      - SYMBOL=${SYMBOL}
+      - SYMBOL=ES
       - EXCHANGE=${EXCHANGE}
-      - DB_SYMBOL=${DB_SYMBOL}
+      - DB_SYMBOL=ES_CONTFUT
       - SOURCE=ibkr
 
-  watchdog:
+  watchdog_es:
     build: ./watchdog
-    container_name: watchdog
+    container_name: watchdog_es
     restart: unless-stopped
     depends_on:
       - ib-gateway
     environment:
-      - IB_HOST=${IB_HOST}
-      - IB_PORT=${IB_PORT}
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
       - IB_CLIENT_ID=202
       - DATABASE_URL=${DATABASE_URL}
-      - SYMBOL=${SYMBOL}
+      - SYMBOL=ES
       - EXCHANGE=${EXCHANGE}
-      - DB_SYMBOL=${DB_SYMBOL}
+      - DB_SYMBOL=ES_CONTFUT
       - SOURCE=ibkr
       - MAX_GAP_MINUTES=${MAX_GAP_MINUTES}
       - BACKFILL_MINUTES=${BACKFILL_MINUTES}
       - WATCHDOG_INTERVAL_SECONDS=${WATCHDOG_INTERVAL_SECONDS}
       - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+
+  collector_mes:
+    build: ./collector
+    container_name: collector_mes
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=203
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=MES
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=MES_CONTFUT
+      - SOURCE=ibkr
+
+  watchdog_mes:
+    build: ./watchdog
+    container_name: watchdog_mes
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=204
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=MES
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=MES_CONTFUT
+      - SOURCE=ibkr
+      - MAX_GAP_MINUTES=${MAX_GAP_MINUTES}
+      - BACKFILL_MINUTES=${BACKFILL_MINUTES}
+      - WATCHDOG_INTERVAL_SECONDS=${WATCHDOG_INTERVAL_SECONDS}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+
 
 volumes:
   ibgw:

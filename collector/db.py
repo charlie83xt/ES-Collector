@@ -20,11 +20,18 @@ def get_conn():
     url = os.environ["DATABASE_URL"]
     # For Supabase transaction pooler, prepared statements can be problematic;
     # we are using simple statements + autocommit.
-    conn = psycopg.connect(url, autocommit=True, row_factory=dict_row)
+    conn = psycopg.connect(url, autocommit=True, row_factory=dict_row, prepare_threshold=0)
     return conn
 
 def upsert_many(conn, rows: list[dict]):
     if not rows:
         return
+    # Ensure always a list[dict]
+    if isinstance(rows, dict):
+        rows = [rows]
+    if not isinstance(rows, list) or not all(isinstance(r, dict) for r in rows):
+        raise TypeError(f"upsert_many expects list[dict], got {type(rows)}: {rows!r}")
     with conn.cursor() as cur:
-        cur.executemany(UPSERT_SQL, rows)
+        for r in rows:
+            # prepare=False prevents server-side prepared statements entirely
+            cur.execute(UPSERT_SQL, r, prepare=False)

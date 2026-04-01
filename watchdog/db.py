@@ -18,7 +18,7 @@ on conflict (symbol, ts) do update set
 
 def get_conn():
     url = os.environ["DATABASE_URL"]
-    conn = psycopg.connect(url, autocommit=True, row_factory=dict_row)
+    conn = psycopg.connect(url, autocommit=True, row_factory=dict_row, prepare_threshold=0)
     return conn
 
 def get_latest_ts(conn, symbol: str):
@@ -37,5 +37,11 @@ def get_latest_ts(conn, symbol: str):
 def upsert_many(conn, rows: list[dict]):
     if not rows:
         return
+    # Ensure always a list[dict]
+    if isinstance(rows, dict):
+        rows = [rows]
+
     with conn.cursor() as cur:
-        cur.executemany(UPSERT_SQL, rows)
+        for r in rows:
+            # prepare=False prevents server-side prepared statements entirely
+            cur.execute(UPSERT_SQL, r, prepare=False)
