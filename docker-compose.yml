@@ -92,6 +92,78 @@ services:
       - WATCHDOG_INTERVAL_SECONDS=${WATCHDOG_INTERVAL_SECONDS}
       - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
 
+  collector_nq:
+    build: ./collector
+    container_name: collector_nq
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=205
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=NQ
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=NQ_CONTFUT
+      - SOURCE=ibkr
+
+  watchdog_nq:
+    build: ./watchdog
+    container_name: watchdog_nq
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=206
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=NQ
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=NQ_CONTFUT
+      - SOURCE=ibkr
+      - MAX_GAP_MINUTES=${MAX_GAP_MINUTES}
+      - BACKFILL_MINUTES=${BACKFILL_MINUTES}
+      - WATCHDOG_INTERVAL_SECONDS=${WATCHDOG_INTERVAL_SECONDS}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+
+  collector_mnq:
+    build: ./collector
+    container_name: collector_mnq
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=207
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=MNQ
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=MNQ_CONTFUT
+      - SOURCE=ibkr
+
+  watchdog_mnq:
+    build: ./watchdog
+    container_name: watchdog_mnq
+    restart: unless-stopped
+    depends_on:
+      - ib-gateway
+    environment:
+      - IB_HOST=ib-gateway
+      - IB_PORT=4004
+      - IB_CLIENT_ID=208
+      - DATABASE_URL=${DATABASE_URL}
+      - SYMBOL=MNQ
+      - EXCHANGE=${EXCHANGE}
+      - DB_SYMBOL=MNQ_CONTFUT
+      - SOURCE=ibkr
+      - MAX_GAP_MINUTES=${MAX_GAP_MINUTES}
+      - BACKFILL_MINUTES=${BACKFILL_MINUTES}
+      - WATCHDOG_INTERVAL_SECONDS=${WATCHDOG_INTERVAL_SECONDS}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+
 
 volumes:
   ibgw:
